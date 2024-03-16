@@ -202,4 +202,3 @@ const RPSGame = {
 };
 
 RPSGame.play();
-// update on github and update eslint rules to avoid long line error
