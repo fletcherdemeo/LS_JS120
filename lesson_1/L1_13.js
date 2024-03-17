@@ -69,23 +69,23 @@ function createComputer() {
       }
     },
 
-    getLikelihoods() {
-      let sizeOfArray = Object.values(this.likelihoods)
+    getOdds() {
+      let sizeOfArray = Object.values(this.odds)
         .reduce((acc, curr) => acc + curr);
       let choices = new Array(sizeOfArray);
       let start = 0;
-      for (let type in this.likelihoods) {
-        let end = start + this.likelihoods[type];
+      for (let type in this.odds) {
+        let end = start + this.odds[type];
         choices.fill(type, start, end);
-        start += this.likelihoods[type];
+        start += this.odds[type];
       }
 
       return choices;
     },
 
     choose() {
-      this.calculateLikelihoods();
-      const choices = this.getLikelihoods();
+      this.calculateOdds();
+      const choices = this.getOdds();
       let randomIndex = Math.floor(Math.random() * choices.length);
       this.move = choices[randomIndex];
     }
