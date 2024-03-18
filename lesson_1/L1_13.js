@@ -6,6 +6,7 @@ const WINNING_MOVES = {
   spock: ['scissors', 'rock'],
   lizard: ['spock', 'paper'],
 };
+const NUMBER_OF_ROUNDS = 5;
 
 // eslint-disable-next-line max-lines-per-function
 function createPlayer() {
@@ -94,6 +95,7 @@ function createComputer() {
   return Object.assign(playerObject, computerObject);
 }
 
+// eslint-disable-next-line max-lines-per-function
 function createHuman() {
   let playerObject = createPlayer();
 
@@ -102,9 +104,19 @@ function createHuman() {
       let choice;
 
       while (true) {
-        console.log('Please choose rock, paper, scissors, spock or lizard:');
+        console.log(
+          'Please choose (r)ock, (p)aper, (sc)issors, (sp)ock or (l)izard:'
+        );
         choice = readline.question();
-        if (['rock', 'paper', 'scissors', 'spock', 'lizard'].includes(choice)) break;
+        if (choice === 'r') choice = 'rock';
+        else if (choice === 'p') choice = 'paper';
+        else if (choice === 'sc') choice = 'scissors';
+        else if (choice === 'sp') choice = 'spock';
+        else if (choice === 'l') choice = 'lizard';
+        if (
+          ['rock', 'paper', 'scissors', 'spock', 'lizard',]
+            .includes(choice)
+        ) break;
         console.log('Sorry, invalid choice.');
       }
 
@@ -123,11 +135,55 @@ const RPSGame = {
     console.log('Welcome to Rock, Paper, Scissors, Spock, Lizard!');
   },
 
-  displayGoodbyeMessage() {
-    console.log('Thanks for playing Rock, Paper, Scissors, Spock, Lizard. Goodbye!');
+  gameOver() {
+    return (
+      this.human.score < NUMBER_OF_ROUNDS &&
+      this.computer.score < NUMBER_OF_ROUNDS
+    );
   },
 
-  displayWinner() {
+  displayChoices() {
+    console.log(`You chose: ${this.human.move}`);
+    console.log(`The computer chose: ${this.computer.move}`);
+  },
+
+  determineResult() {
+    if (this.human.move === this.computer.move) {
+      return 'tie';
+    } else if (
+      WINNING_MOVES[this.human.move].includes(this.computer.move)
+    ) {
+      return 'human';
+    } else {
+      return 'computer';
+    }
+  },
+
+  displayWinner(result) {
+    if (result === 'human') console.log('You won!');
+    if (result === 'computer') console.log('Computer won!');
+    if (result === 'tie') console.log("It's a tie");
+  },
+
+  incrementScores(result) {
+    if (result === 'human') this.human.score += 1;
+    if (result === 'computer') this.computer.score += 1;
+  },
+
+  updateHistories(result) {
+    if (result === 'human') {
+      this.human.history[this.human.move].push('win');
+      this.computer.history[this.computer.move].push('loss');
+    } else if (result === 'computer') {
+      this.human.history[this.human.move].push('loss');
+      this.computer.history[this.computer.move].push('win');
+    } else {
+      this.human.history[this.human.move].push('tie');
+      this.computer.history[this.computer.move].push('tie');
+    }
+  },
+
+  displayScore() {
     console.log(
       `Score is - human: ${this.human.score} computer: ${this.computer.score}`
     );
@@ -139,35 +195,6 @@ const RPSGame = {
       'Computer is';
     console.log(`${overallWinner} the overall winner!`);
   },
-
-  updateHistories(playerResult, compResult) {
-    this.human.history[this.human.move].push(playerResult);
-    this.computer.history[this.computer.move].push(compResult);
-  },
-
-  determineWinner() {
-    let humanMove = this.human.move;
-    let compMove = this.computer.move;
-
-    console.log(`You chose: ${humanMove}`);
-    console.log(`The computer chose: ${compMove}`);
-
-    if (humanMove === compMove) {
-      console.log("It's a tie");
-      this.updateHistories('tie', 'tie');
-    } else if (WINNING_MOVES[humanMove].includes(compMove)) {
-      console.log('You win!');
-      this.human.score += 1;
-      this.updateHistories('win', 'loss');
-    } else {
-      console.log('Computer wins!');
-      this.computer.score += 1;
-      this.updateHistories('loss', 'win');
-    }
-
-    this.displayWinner();
-  },
-
 
   playAgain() {
     this.human.score = 0;
@@ -183,13 +210,26 @@ const RPSGame = {
     return answer[0] === 'y';
   },
 
+  displayGoodbyeMessage() {
+    console.log(
+      'Thanks for playing Rock, Paper, Scissors, Spock, Lizard. Goodbye!'
+    );
+  },
+
   play() {
+    console.clear();
     this.displayWelcomeMessage();
     while (true) {
-      while (this.human.score < 5 && this.computer.score < 5) {
+      while (this.gameOver()) {
         this.human.choose();
         this.computer.choose();
-        this.determineWinner();
+        console.clear();
+        this.displayChoices();
+        let result = this.determineResult();
+        this.displayWinner(result);
+        this.incrementScores(result);
+        this.updateHistories(result);
+        this.displayScore();
       }
       this.displayOverallWinner();
       if (!this.playAgain()) break;
