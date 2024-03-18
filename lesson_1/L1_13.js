@@ -136,7 +136,7 @@ const RPSGame = {
   },
 
   gameOver() {
-    return (
+    return !(
       this.human.score < NUMBER_OF_ROUNDS &&
       this.computer.score < NUMBER_OF_ROUNDS
     );
@@ -216,20 +216,24 @@ const RPSGame = {
     );
   },
 
+  playRound() {
+    this.human.choose();
+    this.computer.choose();
+    console.clear();
+    this.displayChoices();
+    let result = this.determineResult();
+    this.displayWinner(result);
+    this.incrementScores(result);
+    this.updateHistories(result);
+    this.displayScore();
+  },
+
   play() {
     console.clear();
     this.displayWelcomeMessage();
     while (true) {
-      while (this.gameOver()) {
-        this.human.choose();
-        this.computer.choose();
-        console.clear();
-        this.displayChoices();
-        let result = this.determineResult();
-        this.displayWinner(result);
-        this.incrementScores(result);
-        this.updateHistories(result);
-        this.displayScore();
+      while (!this.gameOver()) {
+        this.playRound();
       }
       this.displayOverallWinner();
       if (!this.playAgain()) break;
