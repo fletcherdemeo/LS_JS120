@@ -91,7 +91,7 @@
 //   },
 // };
 
-console.log(bar.add.call(foo));
+// console.log(bar.add.call(foo));
 // This code will return 3.
 // The execution context is changed to the foo object whose a and b 
 // properties refer to 1 and 2. The add function will thus have 
