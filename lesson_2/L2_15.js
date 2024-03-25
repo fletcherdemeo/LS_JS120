@@ -181,15 +181,19 @@
 // with an explicit context such that foo.a gets incremented with each
 // invocation of incrementA.
 
-let foo = {
-  a: 0,
-  incrementA: function() {
-    let increment = () => {this.a += 1};
+// let foo = {
+//   a: 0,
+//   incrementA: function() {
+//     let increment = () => {this.a += 1};
 
-    increment();
-  }
-};
+//     increment();
+//   }
+// };
 
-foo.incrementA();
-foo.incrementA();
-foo.incrementA();
+// foo.incrementA();
+// foo.incrementA();
+// foo.incrementA();
+
+// good night
+// good afternoon
+// good morning
