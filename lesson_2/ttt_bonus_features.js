@@ -76,6 +76,17 @@ class Board {
 
     return markers.length;
   }
+
+  joinOr(arr, delimiter = ', ', finalDelimiter = 'or') {
+    if (arr.length <= 2) {
+      return arr.join(` ${finalDelimiter} `);
+    }
+  
+    let lastInd = arr.length - 1;
+    let str1 = arr.slice(0, lastInd).join(delimiter);
+    let str2 = `${finalDelimiter} ${arr[lastInd]}`;
+    return `${str1}${delimiter}${str2}`;
+  }
 }
 
 class Player {
@@ -162,7 +173,7 @@ class TTTGame {
 
     while (true) {
       let validChoices = this.board.unusedSquares();
-      const prompt = `Choose a square(${validChoices.join(", ")}): `;
+      const prompt = `Choose a square(${this.board.joinOr(validChoices)}): `;
       choice = readline.question(prompt);
 
       if (validChoices.includes(choice)) break;
