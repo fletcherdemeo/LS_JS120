@@ -124,17 +124,25 @@ class TTTGame {
     let initialRun = true;
 
     while (true) {
-      this.board.display(initialRun);
-      initialRun = false;
-
-      this.humanMoves();
-      if (this.gameOver()) break;
-
-      this.computerMoves();
-      if (this.gameOver()) break;
+      while (true) {
+        this.board.display(initialRun);
+        initialRun = false;
+  
+        this.humanMoves();
+        if (this.gameOver()) break;
+  
+        this.computerMoves();
+        if (this.gameOver()) break;
+      }
+  
+      this.displayResults();
+      if (this.playAgain()) {
+        this.board = new Board();
+      } else {
+        break;
+      };
     }
 
-    this.displayResults();
     this.displayGoodbyeMessage();
   }
 
@@ -186,6 +194,9 @@ class TTTGame {
   }
 
   computerMoves() {
+    // determine defensive choice here
+
+    // determine random choice here
     let validChoices = this.board.unusedSquares();
     let choice;
 
@@ -198,6 +209,23 @@ class TTTGame {
 
   gameOver() {
     return this.board.isFull() || this.someoneWon();
+  }
+
+  playAgain() {
+    const validChoices = ['y', 'n'];
+    let choice;
+
+    while (true) {
+      const prompt = `Play again (y/n): `;
+      choice = readline.question(prompt);
+  
+      if (validChoices.includes(choice.toLowerCase())) break;
+
+      console.log("Sorry, that's not a valid choice.");
+      console.log('');
+    }
+
+    return choice === 'y';
   }
 
   someoneWon() {
