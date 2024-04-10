@@ -98,6 +98,16 @@ class Computer extends Player {
   constructor() {
     super(Square.COMPUTER_MARKER);
   }
+
+  defensiveMove(winningMoves, board) {
+    return winningMoves.filter(row => {
+      // NEED TO COUNT MARKERS FOR HUMAN AND UNUSED SQUARES
+      // return (
+      //   board.countMarkersFor(player, row) === 2 &&
+      //   board.countMarkersFor(player, row) === 1
+      // );
+    });
+  }
 }
 
 class TTTGame {
@@ -194,17 +204,33 @@ class TTTGame {
   }
 
   computerMoves() {
-    // determine defensive choice here
-
-    // determine random choice here
-    let validChoices = this.board.unusedSquares();
     let choice;
+    let validChoices = this.board.unusedSquares();
+    let defensiveMoves = this.getDefensiveMoves();
 
-    do {
-      choice = Math.floor((9 * Math.random()) + 1).toString();
-    } while (!validChoices.includes(choice));
+    validChoices.forEach(option => {
+      defensiveMoves.forEach(row => {
+        if (row.includes(option)) choice = option;
+      })
+    })
+
+    if (!choice) {
+      do {
+        choice = Math.floor((9 * Math.random()) + 1).toString();
+      } while (!validChoices.includes(choice));
+    }
 
     this.board.markSquareAt(choice, this.computer.getMarker());
+  }
+
+  getDefensiveMoves() {
+    return TTTGame.POSSIBLE_WINNING_MOVES
+      .filter(row => {
+        return (
+          this.board.countMarkersFor(this.human, row) === 2 && 
+          this.board.countMarkersFor(this.computer, row) !== 1
+        );
+      });
   }
 
   gameOver() {
