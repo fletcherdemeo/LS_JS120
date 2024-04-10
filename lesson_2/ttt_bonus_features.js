@@ -98,16 +98,6 @@ class Computer extends Player {
   constructor() {
     super(Square.COMPUTER_MARKER);
   }
-
-  defensiveMove(winningMoves, board) {
-    return winningMoves.filter(row => {
-      // NEED TO COUNT MARKERS FOR HUMAN AND UNUSED SQUARES
-      // return (
-      //   board.countMarkersFor(player, row) === 2 &&
-      //   board.countMarkersFor(player, row) === 1
-      // );
-    });
-  }
 }
 
 class TTTGame {
