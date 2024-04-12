@@ -203,6 +203,8 @@ class TTTGame {
       choice = offensiveMove;
     } else if (defensiveMove) {
       choice = defensiveMove;
+    } else if (validChoices.includes('5')) {
+      choice = '5';
     } else {
       do {
         choice = Math.floor((9 * Math.random()) + 1).toString();
