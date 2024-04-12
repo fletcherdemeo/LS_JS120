@@ -196,15 +196,14 @@ class TTTGame {
   computerMoves() {
     let choice;
     let validChoices = this.board.unusedSquares();
-    let defensiveMoves = this.getDefensiveMoves();
+    let offensiveMove = this.winnableMoves(this.computer, this.human);
+    let defensiveMove = this.winnableMoves(this.human, this.computer);
 
-    validChoices.forEach(option => {
-      defensiveMoves.forEach(row => {
-        if (row.includes(option)) choice = option;
-      })
-    })
-
-    if (!choice) {
+    if (offensiveMove) {
+      choice = offensiveMove;
+    } else if (defensiveMove) {
+      choice = defensiveMove;
+    } else {
       do {
         choice = Math.floor((9 * Math.random()) + 1).toString();
       } while (!validChoices.includes(choice));
@@ -213,14 +212,27 @@ class TTTGame {
     this.board.markSquareAt(choice, this.computer.getMarker());
   }
 
-  getDefensiveMoves() {
-    return TTTGame.POSSIBLE_WINNING_MOVES
+  winnableMoves(player1, player2) {
+    let move;
+    let validChoices = this.board.unusedSquares();
+
+    let rows = TTTGame.POSSIBLE_WINNING_MOVES
       .filter(row => {
         return (
-          this.board.countMarkersFor(this.human, row) === 2 && 
-          this.board.countMarkersFor(this.computer, row) !== 1
+          this.board.countMarkersFor(player1, row) === 2 && 
+          this.board.countMarkersFor(player2, row) !== 1
         );
       });
+
+    for (let ind1 = 0; ind1 < validChoices.length; ind1 += 1) {
+      let option = validChoices[ind1];
+      for (let ind2 = 0; ind2 < rows.length; ind2 += 1) {
+        let row = rows[ind2]
+        if (row.includes(option)) move = option;
+      }
+    }
+
+    return move;
   }
 
   gameOver() {
