@@ -106,6 +106,7 @@ class Computer extends Player {
 }
 
 class TTTGame {
+  static MATCH_GOAL = 3;
   static POSSIBLE_WINNING_MOVES = [
     [ "1", "2", "3" ],
     [ "4", "5", "6" ],
@@ -128,7 +129,8 @@ class TTTGame {
     this.displayWelcomeMessage();
     let initialRun = true;
 
-    while (this.human.score < 3 && this.computer.score < 3) {
+    while (this.human.score < TTTGame.MATCH_GOAL
+           && this.computer.score < 3) {
       while (true) {
         this.board.display(initialRun);
         initialRun = false;
@@ -151,7 +153,8 @@ class TTTGame {
       };
     }
 
-    if (this.human.score === 3 || this.computer.score === 3) {
+    if (this.human.score === TTTGame.MATCH_GOAL 
+        || this.computer.score === TTTGame.MATCH_GOAL) {
       this.displayMatchWinner();
     }
     this.displayGoodbyeMessage();
@@ -300,7 +303,7 @@ class TTTGame {
 
   isWinner(player) {
     return TTTGame.POSSIBLE_WINNING_MOVES.some(row => {
-      return this.board.countMarkersFor(player, row) === 3;
+      return this.board.countMarkersFor(player, row) === TTTGame.MATCH_GOAL;
     });
   }
 }
