@@ -81,10 +81,15 @@ class Board {
 class Player {
   constructor(marker) {
     this.marker = marker;
+    this.score = 0;
   }
 
   getMarker() {
     return this.marker;
+  }
+
+  incrementScore() {
+    this.score += 1;
   }
 }
 
@@ -123,7 +128,7 @@ class TTTGame {
     this.displayWelcomeMessage();
     let initialRun = true;
 
-    while (true) {
+    while (this.human.score < 3 && this.computer.score < 3) {
       while (true) {
         this.board.display(initialRun);
         initialRun = false;
@@ -136,6 +141,9 @@ class TTTGame {
       }
   
       this.displayResults();
+      this.recordScore();
+      this.displayScore();
+
       if (this.playAgain()) {
         this.board = new Board();
       } else {
@@ -143,6 +151,9 @@ class TTTGame {
       };
     }
 
+    if (this.human.score === 3 || this.computer.score === 3) {
+      this.displayMatchWinner();
+    }
     this.displayGoodbyeMessage();
   }
 
@@ -150,8 +161,27 @@ class TTTGame {
     console.log('Welcome to Tic Tac Toe!');
   }
 
+  displayMatchWinner() {
+    let message;
+    if (this.human.score > this.computer.score) {
+      message = 'Congratulations you won the match!';
+    } else {
+      message = "Unlucky, I'm the matchwinner!";
+    }
+
+    console.log(message);
+  }
+
   displayGoodbyeMessage() {
     console.log('Thanks for playing Tic Tac Toe! Goodbye!');
+  }
+
+  recordScore() {
+    if (this.isWinner(this.human)) {
+      this.human.incrementScore();
+    } else if (this.isWinner(this.computer)) {
+      this.computer.incrementScore();
+    }
   }
 
   displayResults() {
@@ -163,6 +193,12 @@ class TTTGame {
     } else {
       console.log('A tie game. How boring.');
     }
+  }
+
+  displayScore() {
+    let humanScoreStr = `Human: ${this.human.score}`;
+    let computerScoreStr = `Computer: ${this.computer.score}`;
+    console.log(`CURRENT SCORE -- ${humanScoreStr} : ${computerScoreStr}`);
   }
 
   humanMoves() {
@@ -247,9 +283,9 @@ class TTTGame {
 
     while (true) {
       const prompt = `Play again (y/n): `;
-      choice = readline.question(prompt);
+      choice = readline.question(prompt).toLowerCase();
   
-      if (validChoices.includes(choice.toLowerCase())) break;
+      if (validChoices.includes(choice)) break;
 
       console.log("Sorry, that's not a valid choice.");
       console.log('');
