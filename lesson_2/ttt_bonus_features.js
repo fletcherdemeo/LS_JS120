@@ -117,40 +117,50 @@ class TTTGame {
     [ "1", "5", "9" ],
     [ "3", "5", "7" ]
   ];
+  static joinOr(arr, delimiter = ', ', finalDelimiter = 'or') {
+    if (arr.length <= 2) {
+      return arr.join(` ${finalDelimiter} `);
+    }
+  
+    let lastInd = arr.length - 1;
+    let str1 = arr.slice(0, lastInd).join(delimiter);
+    let str2 = `${finalDelimiter} ${arr[lastInd]}`;
+    return `${str1}${delimiter}${str2}`;
+  }
 
   constructor() {
     this.board = new Board();
     this.human = new Human();
     this.computer = new Computer();
+    this.firstPlayer = this.human;
   }
 
   play() {
-    console.clear();
     this.displayWelcomeMessage();
     let initialRun = true;
 
-    while (this.human.score < TTTGame.MATCH_GOAL
-           && this.computer.score < 3) {
+    while (this.human.score < TTTGame.MATCH_GOAL && this.computer.score < 3) {
+      let currentPlayer = this.firstPlayer;
+
       while (true) {
         this.board.display(initialRun);
         initialRun = false;
   
-        this.humanMoves();
+        this.playerMoves(currentPlayer);
         if (this.gameOver()) break;
-  
-        this.computerMoves();
-        if (this.gameOver()) break;
+
+        currentPlayer = this.changePlayer(currentPlayer);
       }
   
       this.displayResults();
       this.recordScore();
       this.displayScore();
+      this.firstPlayer = this.changePlayer(this.firstPlayer);
 
-      if (this.playAgain()) {
-        this.board = new Board();
-      } else {
+      if (!this.playAgain()) {
         break;
       };
+      this.board = new Board();
     }
 
     if (this.human.score === TTTGame.MATCH_GOAL 
@@ -160,7 +170,24 @@ class TTTGame {
     this.displayGoodbyeMessage();
   }
 
+  playerMoves(player) {
+    if (player.constructor.name === 'Human') {
+      this.humanMoves();
+    } else if (player.constructor.name === 'Computer') {
+      this.computerMoves();
+    }
+  }
+
+  changePlayer(player) {
+    if (player.constructor.name === 'Human') {
+      return this.computer;
+    } else if (player.constructor.name === 'Computer') {
+      return this.human;
+    }
+  }
+
   displayWelcomeMessage() {
+    console.clear();
     console.log('Welcome to Tic Tac Toe!');
   }
 
@@ -219,17 +246,6 @@ class TTTGame {
     }
 
     this.board.markSquareAt(choice, this.human.getMarker());
-  }
-
-  static joinOr(arr, delimiter = ', ', finalDelimiter = 'or') {
-    if (arr.length <= 2) {
-      return arr.join(` ${finalDelimiter} `);
-    }
-  
-    let lastInd = arr.length - 1;
-    let str1 = arr.slice(0, lastInd).join(delimiter);
-    let str2 = `${finalDelimiter} ${arr[lastInd]}`;
-    return `${str1}${delimiter}${str2}`;
   }
 
   computerMoves() {
