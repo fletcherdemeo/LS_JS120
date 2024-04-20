@@ -177,7 +177,7 @@ class TTTGame {
     while (true) {
       const prompt = `Play again (y/n): `;
       choice = readline.question(prompt).toLowerCase();
-  
+
       if (validChoices.includes(choice)) break;
 
       console.log("Sorry, that's not a valid choice.");
@@ -253,9 +253,9 @@ class TTTGame {
     let middleSquare = this.middleSquare();
 
     let choice = (
-      offensiveMove || 
-      defensiveMove || 
-      middleSquare || 
+      offensiveMove ||
+      defensiveMove ||
+      middleSquare ||
       this.randomChoice()
     );
 
@@ -271,22 +271,29 @@ class TTTGame {
     return choice;
   }
 
-  winnableMoves(player1, player2) {
-    let move;
-    let validChoices = this.board.unusedSquares();
-
-    let rows = TTTGame.POSSIBLE_WINNING_MOVES
+  getAtRiskRows(player1, player2) {
+    return TTTGame.POSSIBLE_WINNING_MOVES
       .filter(row => {
         return (
-          this.board.countMarkersFor(player1, row) === (TTTGame.MATCH_GOAL - 1) && 
-          this.board.countMarkersFor(player2, row) !== (TTTGame.MATCH_GOAL - 2)
+          this.board.countMarkersFor(player1, row) === (
+            TTTGame.MATCH_GOAL - 1
+          ) &&
+          this.board.countMarkersFor(player2, row) !== (
+            TTTGame.MATCH_GOAL - 2
+          )
         );
       });
+  }
 
+  winnableMoves(player1, player2) {
+    let validChoices = this.board.unusedSquares();
+    let rows = this.getAtRiskRows(player1, player2);
+
+    let move;
     for (let ind1 = 0; ind1 < validChoices.length; ind1 += 1) {
       let option = validChoices[ind1];
       for (let ind2 = 0; ind2 < rows.length; ind2 += 1) {
-        let row = rows[ind2]
+        let row = rows[ind2];
         if (row.includes(option)) move = option;
       }
     }
@@ -296,7 +303,7 @@ class TTTGame {
 
   middleSquare() {
     let validChoices = this.board.unusedSquares();
-    if (validChoices.includes('5')) return '5';
+    return validChoices.includes('5') ? '5' : null;
   }
 
   gameOver() {
@@ -315,7 +322,7 @@ class TTTGame {
 
   matchOver() {
     return (
-      this.human.score  >= TTTGame.MATCH_GOAL || 
+      this.human.score  >= TTTGame.MATCH_GOAL ||
       this.computer.score >= TTTGame.MATCH_GOAL
     );
   }
@@ -338,7 +345,7 @@ class TTTGame {
     if (arr.length <= 2) {
       return arr.join(` ${finalDelimiter} `);
     }
-  
+
     let lastInd = arr.length - 1;
     let str1 = arr.slice(0, lastInd).join(delimiter);
     let str2 = `${finalDelimiter} ${arr[lastInd]}`;
