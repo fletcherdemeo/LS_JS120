@@ -130,21 +130,35 @@ class Dealer extends Participant {
 
 class TwentyOneGame {
   constructor() {
-    this.player = new Player();
-    this.dealer = new Dealer();
-    this.deck = new Deck();
+    this.startNewGame();
   }
 
   start() {
     this.displayWelcomeMessage();
-    this.dealCards();
-    this.showCards();
-    this.playerTurn();
-    if (!this.player.isBusted()) {
-      this.dealerTurn();
+    while (true) {
+      this.dealCards();
+      this.showCards();
+      this.playerTurn();
+
+      if (!this.player.isBusted()) {
+        this.dealerTurn();
+      }
+      this.displayResult();
+
+      if (!this.playAgain()) {
+        this.displayGoodbyeMessage();
+        break;  
+      }
+
+      this.startNewGame();
     }
-    this.displayResult();
-    this.displayGoodbyeMessage();
+  }
+
+  startNewGame() {
+    console.clear();
+    this.player = new Player();
+    this.dealer = new Dealer();
+    this.deck = new Deck();
   }
 
   dealCards() {
@@ -161,7 +175,7 @@ class TwentyOneGame {
 
   playerTurn() {
     while (!this.player.isBusted()) {
-      const prompt = `Do you want to (h)it or (s)tay?`;
+      const prompt = `Do you want to (h)it or (s)tay? `;
       let choice = readline.question(prompt).toLowerCase();
   
       if (choice === 'h') {
@@ -220,6 +234,12 @@ class TwentyOneGame {
     } else {
       console.log('Tied hands!');
     }
+  }
+
+  playAgain() {
+    const prompt = `Do you want to play again? (y)es or (n)o `;
+    let choice = readline.question(prompt).toLowerCase();
+    return choice === 'y';
   }
 }
 
