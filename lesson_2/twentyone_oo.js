@@ -175,13 +175,12 @@ class TwentyOneGame {
   }
 
   dealerTurn() {
-    while (!this.dealer.isBusted()) {
+    while (
+      !this.dealer.isBusted() && 
+      this.dealer.getHandPoints() < 17
+    ) {
+
       this.dealer.reveal();
-
-      if (this.dealer.getHandPoints() > 17) {
-        break;
-      }
-
       this.dealer.hit(this.deck.deal());
     }
 
