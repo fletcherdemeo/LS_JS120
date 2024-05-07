@@ -44,6 +44,10 @@ class Deck {
     let randomInd = Math.floor(Math.random() * this.cards.length);
     return this.cards.splice(randomInd, 1)[0];
   }
+
+  remainingCards() {
+    return this.cards.length;
+  }
 }
 
 class Participant {
@@ -75,11 +79,24 @@ class Participant {
   isBusted() {
     return this.getScore() > 21;
   }
+
+  resetHand() {
+    this.hand = [];
+  }
 }
 
 class Player extends Participant {
   constructor() {
     super();
+    this.bank = 5;
+  }
+
+  decreaseBankBalance() {
+    this.bank = this.bank - 1;
+  }
+
+  increaseBankBalance() {
+    this.bank = this.bank + 1;
   }
 }
 
@@ -112,6 +129,7 @@ class TwentyOneGame {
       if (!this.player.isBusted()) {
         this.dealerTurn();
       }
+      this.adjustPlayerBankBalance();
       this.displayResult();
 
       if (!this.playAgain()) {
@@ -119,7 +137,11 @@ class TwentyOneGame {
         break;  
       }
 
-      this.startNewGame();
+      if (this.deck.remainingCards() < 10) {
+        this.deck = new Deck();
+      }
+
+      this.startNewHand();
     }
   }
 
@@ -128,6 +150,12 @@ class TwentyOneGame {
     this.player = new Player();
     this.dealer = new Dealer();
     this.deck = new Deck();
+  }
+
+  startNewHand() {
+    console.clear();
+    this.player.resetHand();
+    this.dealer.resetHand();
   }
 
   dealCards() {
@@ -160,7 +188,6 @@ class TwentyOneGame {
 
   dealerTurn() {
     while (!this.dealer.isBusted() && this.dealer.getScore() < 17) {
-
       this.dealer.reveal();
       this.dealer.hit(this.deck.deal());
     }
@@ -170,6 +197,8 @@ class TwentyOneGame {
 
   displayWelcomeMessage() {
     console.log('Welcome to Twenty-One');
+    console.log('You have $5 to bet. Each loss will cost $1, each win will earn $1');
+    console.log("Game's over when you go broke ($0) or get rich ($10)");
   }
 
   displayGoodbyeMessage() {
@@ -192,6 +221,12 @@ class TwentyOneGame {
     }
   }
 
+  adjustPlayerBankBalance() {
+    let result = this.getResult();
+    if (result === 'player') this.player.increaseBankBalance();
+    if (result === 'dealer') this.player.decreaseBankBalance();
+  }
+
   displayResult() {
     let result = this.getResult();
     if (result === 'player') {
@@ -201,6 +236,8 @@ class TwentyOneGame {
     } else {
       console.log('Tied hands!');
     }
+
+    console.log(`You have $${this.player.bank} remaining`);
   }
 
   playAgain() {
