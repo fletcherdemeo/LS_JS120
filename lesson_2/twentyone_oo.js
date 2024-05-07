@@ -51,80 +51,49 @@ class Participant {
     this.hand = [];
   }
 
-  getHandAsStr(numOfCardsToNotShow) {
-    let numOfCardsToShow = this.hand.length - numOfCardsToNotShow;
-    return this.hand
-      .slice(0, numOfCardsToShow)
-      .map(card => {
-        return `${card.rank} of ${card.suit}`;
-      }).join('; ');
+  getScore() {
+    return this.hand.reduce((acc, curr) => acc + curr.points, 0);
   }
 
-  getHandPoints(numOfCardsToNotShow = 0) {
-    let numOfCardsToShow = this.hand.length - numOfCardsToNotShow;
+  getHandAsStr() {
     return this.hand
-      .slice(0, numOfCardsToShow)
-      .reduce((acc, curr) => acc + curr.points, 0);
+      .map(card => `${card.rank} of ${card.suit}`)
+      .join('; ');
   }
 
-  displayHandAndPoints(playerName, numOfCardsToNotShow = 0) {
-    let cards = this.getHandAsStr(numOfCardsToNotShow);
-    let points = this.getHandPoints(numOfCardsToNotShow);
-    console.log(`${playerName} has: ${cards} for ${points} points`);
+  reveal() {
+    let cards = this.getHandAsStr();
+    let points = this.getScore();
+    let playerType = this.constructor.name;
+    console.log(`${playerType} has: ${cards} for ${points} points`);
   }
 
   hit(card) {
     this.hand.push(card);
-    //STUB
-  }
-
-  stay() {
-    //STUB
   }
 
   isBusted() {
-    return this.getHandPoints() > 21;
-  }
-
-  score() {
-    //STUB
+    return this.getScore() > 21;
   }
 }
 
 class Player extends Participant {
   constructor() {
     super();
-    this.type = "Player";
-    //STUB
-    // What sort of state does a player need?
-    // Score? Hand? Amount of money available?
-  }
-
-  reveal() {
-    return this.displayHandAndPoints(this.type);
   }
 }
 
 class Dealer extends Participant {
   constructor() {
     super();
-    this.type = "Dealer";
-    //STUB
-    // What sort of state does a dealer need?
-    // Score? Hand? Deck of cards? Bow tie?
-  }
-
-  reveal(numOfCardsToNotShow) {
-    return this.displayHandAndPoints(this.type, numOfCardsToNotShow);
   }
 
   hide() {
-    //STUB
+    this.hiddenCard = this.hand.splice(-1, 1)[0];
   }
 
-  deal() {
-    //STUB
-    // does the dealer or the deck deal?
+  addHiddenCardBackToHand() {
+    this.hand.push(this.hiddenCard);
   }
 }
 
@@ -170,7 +139,9 @@ class TwentyOneGame {
 
   showCards() {
     this.player.reveal();
-    this.dealer.reveal(1);
+    this.dealer.hide();
+    this.dealer.reveal();
+    this.dealer.addHiddenCardBackToHand();
   }
 
   playerTurn() {
@@ -182,17 +153,13 @@ class TwentyOneGame {
         this.player.hit(this.deck.deal());
         this.player.reveal();
       } else if (choice === 's') {
-        this.player.stay();
         break;
       }  
     }
   }
 
   dealerTurn() {
-    while (
-      !this.dealer.isBusted() && 
-      this.dealer.getHandPoints() < 17
-    ) {
+    while (!this.dealer.isBusted() && this.dealer.getScore() < 17) {
 
       this.dealer.reveal();
       this.dealer.hit(this.deck.deal());
@@ -210,8 +177,8 @@ class TwentyOneGame {
   }
 
   getResult() {
-    let playerPoints = this.player.getHandPoints();
-    let dealerPoints = this.dealer.getHandPoints();
+    let playerPoints = this.player.getScore();
+    let dealerPoints = this.dealer.getScore();
     if (playerPoints > 21) {
       return 'dealer';
     } else if (dealerPoints > 21) {
