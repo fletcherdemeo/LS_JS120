@@ -152,7 +152,7 @@ class TwentyOneGame {
 
   dealNewCard(player) {
     let newCard = this.deck.deal();
-    player.hand.push(newCard);
+    player.hit(newCard);
     this.cardsPlayed.push(newCard);
   }
 
