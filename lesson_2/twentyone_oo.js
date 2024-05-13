@@ -249,9 +249,11 @@ class TwentyOneGame {
   }
 
   playAgain() {
-    const prompt = `Do you want to play again? (y)es or (n)o `;
-    let choice = readline.question(prompt).toLowerCase();
-    return choice === 'y';  
+    while (true) {
+      const prompt = `Do you want to play again? (y)es or (n)o `;
+      let choice = readline.question(prompt).toLowerCase();
+      if (choice === 'y' || choice === 'n') return choice === 'y';
+    }
   }
 }
 
