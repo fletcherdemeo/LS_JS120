@@ -150,15 +150,17 @@ class TwentyOneGame {
     this.dealer.resetHand();
   }
 
+  dealNewCard(player) {
+    let newCard = this.deck.deal();
+    player.hand.push(newCard);
+    this.cardsPlayed.push(newCard);
+  }
+
   dealCards() {
-    this.player.hand.push(this.deck.deal());
-    this.cardsPlayed.push(this.player.hand.slice(-1)[0]);
-    this.dealer.hand.push(this.deck.deal());
-    this.cardsPlayed.push(this.dealer.hand.slice(-1)[0]);
-    this.player.hand.push(this.deck.deal());
-    this.cardsPlayed.push(this.player.hand.slice(-1)[0]);
-    this.dealer.hand.push(this.deck.deal());
-    this.cardsPlayed.push(this.dealer.hand.slice(-1)[0]);
+    for (let cardsToDeal = 0; cardsToDeal < 2; cardsToDeal += 1) {
+      this.dealNewCard(this.player);
+      this.dealNewCard(this.dealer);
+    }
   }
 
   showCards() {
@@ -176,8 +178,7 @@ class TwentyOneGame {
       let choice = readline.question(prompt).toLowerCase();
   
       if (choice === 'h') {
-        this.player.hit(this.deck.deal());
-        this.cardsPlayed.push(this.player.hand.slice(-1)[0]);
+        this.dealNewCard(this.player);
         this.player.reveal();
       } else if (choice === 's') {
         break;
@@ -190,8 +191,7 @@ class TwentyOneGame {
       if (this.deck.remainingCards() === 0) this.reshuffle();
 
       this.dealer.reveal();
-      this.dealer.hit(this.deck.deal());
-      this.cardsPlayed.push(this.dealer.hand.slice(-1)[0]);
+      this.dealNewCard(this.dealer);
     }
 
     this.dealer.reveal();
