@@ -18,12 +18,12 @@ class Deck {
     {card: '6', points: 6},
     {card: '7', points: 7},
     {card: '8', points: 8},
-    {card: '9', points: 9},
-    {card: '10', points: 10},
-    {card: 'J', points: 10},
-    {card: 'Q', points: 10},
-    {card: 'K', points: 10},
-    {card: 'A', points: 11}
+    // {card: '9', points: 9},
+    // {card: '10', points: 10},
+    // {card: 'J', points: 10},
+    // {card: 'Q', points: 10},
+    // {card: 'K', points: 10},
+    // {card: 'A', points: 11}
   ];
 
   constructor() {
@@ -116,7 +116,10 @@ class Dealer extends Participant {
 
 class TwentyOneGame {
   constructor() {
-    this.startNewGame();
+    this.player = new Player();
+    this.dealer = new Dealer();
+    this.deck = new Deck();
+    this.cardsPlayed = [];
   }
 
   start() {
@@ -137,19 +140,8 @@ class TwentyOneGame {
         break;  
       }
 
-      if (this.deck.remainingCards() < 10) {
-        this.deck = new Deck();
-      }
-
       this.startNewHand();
     }
-  }
-
-  startNewGame() {
-    console.clear();
-    this.player = new Player();
-    this.dealer = new Dealer();
-    this.deck = new Deck();
   }
 
   startNewHand() {
@@ -160,9 +152,13 @@ class TwentyOneGame {
 
   dealCards() {
     this.player.hand.push(this.deck.deal());
+    this.cardsPlayed.push(this.player.hand.slice(-1)[0]);
     this.dealer.hand.push(this.deck.deal());
+    this.cardsPlayed.push(this.dealer.hand.slice(-1)[0]);
     this.player.hand.push(this.deck.deal());
+    this.cardsPlayed.push(this.player.hand.slice(-1)[0]);
     this.dealer.hand.push(this.deck.deal());
+    this.cardsPlayed.push(this.dealer.hand.slice(-1)[0]);
   }
 
   showCards() {
@@ -174,11 +170,14 @@ class TwentyOneGame {
 
   playerTurn() {
     while (!this.player.isBusted()) {
+      if (this.deck.remainingCards() === 0) this.reshuffle();
+
       const prompt = `Do you want to (h)it or (s)tay? `;
       let choice = readline.question(prompt).toLowerCase();
   
       if (choice === 'h') {
         this.player.hit(this.deck.deal());
+        this.cardsPlayed.push(this.player.hand.slice(-1)[0]);
         this.player.reveal();
       } else if (choice === 's') {
         break;
@@ -188,14 +187,23 @@ class TwentyOneGame {
 
   dealerTurn() {
     while (!this.dealer.isBusted() && this.dealer.getScore() < 17) {
+      if (this.deck.remainingCards() === 0) this.reshuffle();
+
       this.dealer.reveal();
       this.dealer.hit(this.deck.deal());
+      this.cardsPlayed.push(this.dealer.hand.slice(-1)[0]);
     }
 
     this.dealer.reveal();
   }
 
+  // fix aces values
+  reshuffle() {
+    this.deck.cards = this.cardsPlayed;
+  }
+
   displayWelcomeMessage() {
+    console.clear();
     console.log('Welcome to Twenty-One');
     console.log('You have $5 to bet. Each loss will cost $1, each win will earn $1');
     console.log("Game's over when you go broke ($0) or get rich ($10)");
@@ -243,7 +251,7 @@ class TwentyOneGame {
   playAgain() {
     const prompt = `Do you want to play again? (y)es or (n)o `;
     let choice = readline.question(prompt).toLowerCase();
-    return choice === 'y';
+    return choice === 'y';  
   }
 }
 
