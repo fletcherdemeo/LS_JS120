@@ -86,7 +86,7 @@ class Participant {
   }
 
   isBusted() {
-    return this.getScore() > 21;
+    return this.getScore() > TwentyOneGame.MAX_POINTS;
   }
 
   resetHand() {
@@ -95,6 +95,9 @@ class Participant {
 }
 
 class Player extends Participant {
+  static MIN_BANK_BALANCE = 0;
+  static MAX_BANK_BALANCE = 10;
+
   constructor() {
     super();
     this.bank = 5;
@@ -110,6 +113,8 @@ class Player extends Participant {
 }
 
 class Dealer extends Participant {
+  static MIN_POINTS = 17;
+
   constructor() {
     super();
   }
@@ -124,6 +129,8 @@ class Dealer extends Participant {
 }
 
 class TwentyOneGame {
+  static MAX_POINTS = 21;
+
   constructor() {
     this.player = new Player();
     this.dealer = new Dealer();
@@ -143,7 +150,10 @@ class TwentyOneGame {
       this.adjustPlayerBankBalance();
       this.displayResult();
 
-      if (this.player.bank === 0 || this.player.bank === 10) break;
+      if (
+        this.player.bank === Player.MIN_BANK_BALANCE || 
+        this.player.bank === Player.MAX_BANK_BALANCE
+      ) break;
 
       this.displayBankBalance();
 
@@ -203,7 +213,10 @@ class TwentyOneGame {
   }
 
   dealerTurn() {
-    while (!this.dealer.isBusted() && this.dealer.getScore() < 17) {
+    while (
+      !this.dealer.isBusted() && 
+      this.dealer.getScore() < Dealer.MIN_POINTS
+    ) {
       if (this.deck.remainingCards() <= 2) this.reshuffle();
 
       this.dealer.reveal();
@@ -225,17 +238,21 @@ class TwentyOneGame {
   }
 
   displayGoodbyeMessage() {
-    if (this.player.bank === 0) console.log('You went bust!');
-    if (this.player.bank === 10) console.log("You're rich!");
+    if (this.player.bank === Player.MIN_BANK_BALANCE) {
+      console.log('You went bust!');
+    }
+    if (this.player.bank === Player.MAX_BANK_BALANCE) {
+      console.log("You're rich!");
+    }
     console.log('Thanks for playing Twenty-One');
   }
 
   getResult() {
     let playerPoints = this.player.getScore();
     let dealerPoints = this.dealer.getScore();
-    if (playerPoints > 21) {
+    if (playerPoints > TwentyOneGame.MAX_POINTS) {
       return 'dealer';
-    } else if (dealerPoints > 21) {
+    } else if (dealerPoints > TwentyOneGame.MAX_POINTS) {
       return 'player';
     } else if (playerPoints > dealerPoints) {
       return 'player';
