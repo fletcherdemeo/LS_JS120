@@ -12,17 +12,17 @@ class Deck {
   static SUITS = ['clubs', 'diamonds', 'hearts', 'spades'];
   static RANKS = [
     // {card: '2', points: 2},
-    // {card: '3', points: 3},
-    // {card: '4', points: 4},
-    // {card: '5', points: 5},
+    {card: '3', points: 3},
+    {card: '4', points: 4},
+    {card: '5', points: 5},
     // {card: '6', points: 6},
     // {card: '7', points: 7},
     // {card: '8', points: 8},
     // {card: '9', points: 9},
-    {card: '10', points: 10},
-    {card: 'J', points: 10},
-    {card: 'Q', points: 10},
-    {card: 'K', points: 10},
+    // {card: '10', points: 10},
+    // {card: 'J', points: 10},
+    // {card: 'Q', points: 10},
+    // {card: 'K', points: 10},
     {card: 'A', points: 11}
   ];
 
@@ -56,8 +56,21 @@ class Participant {
   }
 
   getScore() {
-    // include aces logic within callback function?
-    return this.hand.reduce((acc, curr) => acc + curr.points, 0);
+    let allCardsScore = this.hand
+      .filter(card => card.rank !== 'A')
+      .reduce((acc, curr) => {
+        return acc + curr.points
+      }, 0);
+
+    let aces = this.hand.filter(card => card.rank === 'A');
+    let acesScore = 0;
+    acesScore += allCardsScore > 10 ?
+      aces.length :
+      11 + (1 * (aces.length - 1));
+
+    return aces.length > 0 ? 
+      allCardsScore + acesScore : 
+      allCardsScore;
   }
 
   getHandAsStr() {
@@ -198,7 +211,6 @@ class TwentyOneGame {
     this.dealer.reveal();
   }
 
-  // fix aces values
   reshuffle() {
     this.deck.cards = this.cardsPlayed;
   }
