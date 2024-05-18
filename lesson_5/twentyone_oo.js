@@ -11,18 +11,18 @@ class Card {
 class Deck {
   static SUITS = ['clubs', 'diamonds', 'hearts', 'spades'];
   static RANKS = [
-    // {card: '2', points: 2},
+    {card: '2', points: 2},
     {card: '3', points: 3},
     {card: '4', points: 4},
     {card: '5', points: 5},
-    // {card: '6', points: 6},
-    // {card: '7', points: 7},
-    // {card: '8', points: 8},
-    // {card: '9', points: 9},
-    // {card: '10', points: 10},
-    // {card: 'J', points: 10},
-    // {card: 'Q', points: 10},
-    // {card: 'K', points: 10},
+    {card: '6', points: 6},
+    {card: '7', points: 7},
+    {card: '8', points: 8},
+    {card: '9', points: 9},
+    {card: '10', points: 10},
+    {card: 'J', points: 10},
+    {card: 'Q', points: 10},
+    {card: 'K', points: 10},
     {card: 'A', points: 11}
   ];
 
@@ -62,15 +62,10 @@ class Participant {
         return acc + curr.points
       }, 0);
 
-    let aces = this.hand.filter(card => card.rank === 'A');
-    let acesScore = 0;
-    acesScore += allCardsScore > 10 ?
-      aces.length :
-      11 + (1 * (aces.length - 1));
+    let aces = this.hand.filter(card => card.rank === 'A').length;
+    let acesScore = allCardsScore > 10 ? aces : 11 + (1 * (aces - 1));
 
-    return aces.length > 0 ? 
-      allCardsScore + acesScore : 
-      allCardsScore;
+    return aces > 0 ? allCardsScore + acesScore : allCardsScore;
   }
 
   getHandAsStr() {
@@ -143,19 +138,21 @@ class TwentyOneGame {
       this.showCards();
       this.playerTurn();
 
-      if (!this.player.isBusted()) {
-        this.dealerTurn();
-      }
+      if (!this.player.isBusted()) this.dealerTurn();
+
       this.adjustPlayerBankBalance();
       this.displayResult();
 
-      if (!this.playAgain()) {
-        this.displayGoodbyeMessage();
-        break;  
-      }
+      if (this.player.bank === 0 || this.player.bank === 10) break;
+
+      this.displayBankBalance();
+
+      if (!this.playAgain()) break;
 
       this.startNewHand();
     }
+
+    this.displayGoodbyeMessage();
   }
 
   startNewHand() {
@@ -184,12 +181,17 @@ class TwentyOneGame {
     this.dealer.addHiddenCardBackToHand();
   }
 
+  lineBreak() {
+    console.log('\n');
+  }
+
   playerTurn() {
     while (!this.player.isBusted()) {
-      if (this.deck.remainingCards() === 0) this.reshuffle();
+      if (this.deck.remainingCards() <= 2) this.reshuffle();
 
       const prompt = `Do you want to (h)it or (s)tay? `;
       let choice = readline.question(prompt).toLowerCase();
+      this.lineBreak();
   
       if (choice === 'h') {
         this.dealNewCard(this.player);
@@ -202,7 +204,7 @@ class TwentyOneGame {
 
   dealerTurn() {
     while (!this.dealer.isBusted() && this.dealer.getScore() < 17) {
-      if (this.deck.remainingCards() === 0) this.reshuffle();
+      if (this.deck.remainingCards() <= 2) this.reshuffle();
 
       this.dealer.reveal();
       this.dealNewCard(this.dealer);
@@ -223,6 +225,8 @@ class TwentyOneGame {
   }
 
   displayGoodbyeMessage() {
+    if (this.player.bank === 0) console.log('You went bust!');
+    if (this.player.bank === 10) console.log("You're rich!");
     console.log('Thanks for playing Twenty-One');
   }
 
@@ -257,13 +261,16 @@ class TwentyOneGame {
     } else {
       console.log('Tied hands!');
     }
+  }
 
+  displayBankBalance() {
     console.log(`You have $${this.player.bank} remaining`);
   }
 
   playAgain() {
     while (true) {
-      const prompt = `Do you want to play again? (y)es or (n)o `;
+      console.log('\n');
+      const prompt = `Do you want to play again? (y)es or (n)o: `;
       let choice = readline.question(prompt).toLowerCase();
       if (choice === 'y' || choice === 'n') return choice === 'y';
     }
