@@ -2,9 +2,9 @@ let readline = require('readline-sync');
 
 class Card {
   constructor(suit, rank, points) {
-    this.suit = suit,
-    this.rank = rank,
-    this.points = points
+    this.suit = suit;
+    this.rank = rank;
+    this.points = points;
   }
 }
 
@@ -36,8 +36,8 @@ class Deck {
       Deck.RANKS.forEach(rank => {
         let card = new Card(suit, rank.card, rank.points);
         this.cards.push(card);
-      })
-    })
+      });
+    });
   }
 
   deal() {
@@ -51,6 +51,8 @@ class Deck {
 }
 
 class Participant {
+  static MAX_POINTS = 21;
+
   constructor() {
     this.hand = [];
   }
@@ -59,7 +61,7 @@ class Participant {
     let allCardsScore = this.hand
       .filter(card => card.rank !== 'A')
       .reduce((acc, curr) => {
-        return acc + curr.points
+        return acc + curr.points;
       }, 0);
 
     let aces = this.hand.filter(card => card.rank === 'A').length;
@@ -86,7 +88,7 @@ class Participant {
   }
 
   isBusted() {
-    return this.getScore() > TwentyOneGame.MAX_POINTS;
+    return this.getScore() > Participant.MAX_POINTS;
   }
 
   resetHand() {
@@ -104,11 +106,11 @@ class Player extends Participant {
   }
 
   decreaseBankBalance() {
-    this.bank = this.bank - 1;
+    this.bank -= 1;
   }
 
   increaseBankBalance() {
-    this.bank = this.bank + 1;
+    this.bank += 1;
   }
 }
 
@@ -151,7 +153,7 @@ class TwentyOneGame {
       this.displayResult();
 
       if (
-        this.player.bank === Player.MIN_BANK_BALANCE || 
+        this.player.bank === Player.MIN_BANK_BALANCE ||
         this.player.bank === Player.MAX_BANK_BALANCE
       ) break;
 
@@ -202,19 +204,19 @@ class TwentyOneGame {
       const prompt = `Do you want to (h)it or (s)tay? `;
       let choice = readline.question(prompt).toLowerCase();
       this.lineBreak();
-  
+
       if (choice === 'h') {
         this.dealNewCard(this.player);
         this.player.reveal();
       } else if (choice === 's') {
         break;
-      }  
+      }
     }
   }
 
   dealerTurn() {
     while (
-      !this.dealer.isBusted() && 
+      !this.dealer.isBusted() &&
       this.dealer.getScore() < Dealer.MIN_POINTS
     ) {
       if (this.deck.remainingCards() <= 2) this.reshuffle();
