@@ -76,11 +76,15 @@ class Participant {
       .join('; ');
   }
 
+  prompt(msg) {
+    console.log(`=> ${msg}`);
+  }
+
   reveal() {
     let cards = this.getHandAsStr();
     let points = this.getScore();
     let playerType = this.constructor.name;
-    console.log(`${playerType} has: ${cards} for ${points} points`);
+    this.prompt(`${playerType} has: ${points} points from ${cards}`);
   }
 
   hit(card) {
@@ -141,8 +145,12 @@ class TwentyOneGame {
   }
 
   start() {
+    let firstRun = true;
     this.displayWelcomeMessage();
     while (true) {
+      if (!firstRun) this.displayBankBalance();
+      if (firstRun) firstRun = false;
+
       this.dealCards();
       this.showCards();
       this.playerTurn();
@@ -157,8 +165,6 @@ class TwentyOneGame {
         this.player.bank === Player.MAX_BANK_BALANCE
       ) break;
 
-      this.displayBankBalance();
-
       if (!this.playAgain()) break;
 
       this.startNewHand();
@@ -167,8 +173,16 @@ class TwentyOneGame {
     this.displayGoodbyeMessage();
   }
 
+  prompt(msg) {
+      console.log(`=> ${msg}`);
+  }  
+
+  lineBreak() {
+    console.log('\n');
+  }
+
   startNewHand() {
-    console.clear();
+    this.clearScreen();
     this.player.resetHand();
     this.dealer.resetHand();
   }
@@ -193,16 +207,12 @@ class TwentyOneGame {
     this.dealer.addHiddenCardBackToHand();
   }
 
-  lineBreak() {
-    console.log('\n');
-  }
-
   playerTurn() {
     while (!this.player.isBusted()) {
       if (this.deck.remainingCards() <= 2) this.reshuffle();
 
-      const prompt = `Do you want to (h)it or (s)tay? `;
-      let choice = readline.question(prompt).toLowerCase();
+      this.prompt(`Do you want to (h)it or (s)tay? `);
+      let choice = readline.question().toLowerCase();
       this.lineBreak();
 
       if (choice === 'h') {
@@ -212,6 +222,8 @@ class TwentyOneGame {
         break;
       }
     }
+
+    if (this.player.isBusted()) this.prompt('Player is bust');
   }
 
   dealerTurn() {
@@ -226,27 +238,33 @@ class TwentyOneGame {
     }
 
     this.dealer.reveal();
+    if (this.dealer.isBusted()) this.prompt('Dealer is bust');
   }
 
   reshuffle() {
     this.deck.cards = this.cardsPlayed;
   }
 
-  displayWelcomeMessage() {
+  clearScreen() {
     console.clear();
-    console.log('Welcome to Twenty-One');
-    console.log('You have $5 to bet. Each loss will cost $1, each win will earn $1');
-    console.log("Game's over when you go broke ($0) or get rich ($10)");
+  }
+
+  displayWelcomeMessage() {
+    this.clearScreen();
+    this.prompt('Welcome to Twenty-One');
+    this.prompt('You have $5 to bet. Each loss will cost $1, each win will earn $1');
+    this.prompt("Game's over when you go broke ($0) or get rich ($10)");
+    this.lineBreak();
   }
 
   displayGoodbyeMessage() {
     if (this.player.bank === Player.MIN_BANK_BALANCE) {
-      console.log('You went bust!');
+      this.prompt('You went bust!');
     }
     if (this.player.bank === Player.MAX_BANK_BALANCE) {
-      console.log("You're rich!");
+      this.prompt("You're rich!");
     }
-    console.log('Thanks for playing Twenty-One');
+    this.prompt('Thanks for playing Twenty-One');
   }
 
   getResult() {
@@ -274,23 +292,23 @@ class TwentyOneGame {
   displayResult() {
     let result = this.getResult();
     if (result === 'player') {
-      console.log('Congratulations you won that hand');
+      this.prompt('Congratulations you won that hand');
     } else if (result === 'dealer') {
-      console.log('Unlucky, dealer won that hand!');
+      this.prompt('Unlucky, dealer won that hand!');
     } else {
-      console.log('Tied hands!');
+      this.prompt('Tied hands!');
     }
   }
 
   displayBankBalance() {
-    console.log(`You have $${this.player.bank} remaining`);
+    this.prompt(`Bank balance: $${this.player.bank}`);
   }
 
   playAgain() {
     while (true) {
-      console.log('\n');
-      const prompt = `Do you want to play again? (y)es or (n)o: `;
-      let choice = readline.question(prompt).toLowerCase();
+      this.lineBreak();
+      this.prompt(`Do you want to play again? (y)es or (n)o: `);
+      let choice = readline.question().toLowerCase();
       if (choice === 'y' || choice === 'n') return choice === 'y';
     }
   }
