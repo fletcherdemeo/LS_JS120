@@ -102,11 +102,12 @@ class Participant {
 
 class Player extends Participant {
   static MIN_BANK_BALANCE = 0;
+  static INITIAL_BANK = 5;
   static MAX_BANK_BALANCE = 10;
 
   constructor() {
     super();
-    this.bank = 5;
+    this.bank = Player.INITIAL_BANK;
   }
 
   decreaseBankBalance() {
@@ -116,11 +117,17 @@ class Player extends Participant {
   increaseBankBalance() {
     this.bank += 1;
   }
+
+  isBroke() {
+    return this.bank === Player.MIN_BANK_BALANCE;
+  }
+
+  isRich() {
+    return this.bank === Player.MAX_BANK_BALANCE;
+  }
 }
 
 class Dealer extends Participant {
-  static MIN_POINTS = 17;
-
   constructor() {
     super();
   }
@@ -136,6 +143,9 @@ class Dealer extends Participant {
 
 class TwentyOneGame {
   static MAX_POINTS = 21;
+  static DEALER_MIN_POINTS = TwentyOneGame.MAX_POINTS - 4;
+  static HIT = 'h';
+  static STAY = 's';
 
   constructor() {
     this.player = new Player();
@@ -147,6 +157,7 @@ class TwentyOneGame {
   start() {
     let firstRun = true;
     this.displayWelcomeMessage();
+
     while (true) {
       if (!firstRun) this.displayBankBalance();
       if (firstRun) firstRun = false;
@@ -160,12 +171,11 @@ class TwentyOneGame {
       this.adjustPlayerBankBalance();
       this.displayResult();
 
-      if (
-        this.player.bank === Player.MIN_BANK_BALANCE ||
-        this.player.bank === Player.MAX_BANK_BALANCE
-      ) break;
-
-      if (!this.playAgain()) break;
+      if (this.player.isBroke() || this.player.isRich()) break;
+      if (!this.playAgain()) {
+        this.clearScreen();
+        break
+      };
 
       this.startNewHand();
     }
@@ -211,25 +221,25 @@ class TwentyOneGame {
     while (!this.player.isBusted()) {
       if (this.deck.remainingCards() <= 2) this.reshuffle();
 
-      this.prompt(`Do you want to (h)it or (s)tay? `);
-      let choice = readline.question().toLowerCase();
+      let query = `Do you want to (h)it or (s)tay? `;
+      let choice = readline.question(query).toLowerCase();
       this.lineBreak();
 
-      if (choice === 'h') {
+      if (choice === TwentyOneGame.HIT) {
         this.dealNewCard(this.player);
         this.player.reveal();
-      } else if (choice === 's') {
+      } else if (choice === TwentyOneGame.STAY) {
         break;
       }
     }
 
-    if (this.player.isBusted()) this.prompt('Player is bust');
+    // if (this.player.isBusted()) this.prompt('Player is bust');
   }
 
   dealerTurn() {
     while (
       !this.dealer.isBusted() &&
-      this.dealer.getScore() < Dealer.MIN_POINTS
+      this.dealer.getScore() < TwentyOneGame.DEALER_MIN_POINTS
     ) {
       if (this.deck.remainingCards() <= 2) this.reshuffle();
 
@@ -238,7 +248,7 @@ class TwentyOneGame {
     }
 
     this.dealer.reveal();
-    if (this.dealer.isBusted()) this.prompt('Dealer is bust');
+    // if (this.dealer.isBusted()) this.prompt('Dealer is bust');
   }
 
   reshuffle() {
@@ -258,12 +268,8 @@ class TwentyOneGame {
   }
 
   displayGoodbyeMessage() {
-    if (this.player.bank === Player.MIN_BANK_BALANCE) {
-      this.prompt('You went bust!');
-    }
-    if (this.player.bank === Player.MAX_BANK_BALANCE) {
-      this.prompt("You're rich!");
-    }
+    if (this.player.isBroke()) this.prompt("You're broke!");
+    if (this.player.isRich()) this.prompt("You're rich!");
     this.prompt('Thanks for playing Twenty-One');
   }
 
@@ -291,13 +297,19 @@ class TwentyOneGame {
 
   displayResult() {
     let result = this.getResult();
+    let msg = 'Tied hands!';
+
     if (result === 'player') {
-      this.prompt('Congratulations you won that hand');
+      msg = this.dealer.isBusted() ? 
+        'Dealer went bust, you won that hand!' :
+        'Congratulations you won that hand!';
     } else if (result === 'dealer') {
-      this.prompt('Unlucky, dealer won that hand!');
-    } else {
-      this.prompt('Tied hands!');
+      msg = this.player.isBusted() ?
+        'You went bust, dealer won that hand!' :
+        'Unlucky, dealer won that hand!';
     }
+
+    this.prompt(msg);
   }
 
   displayBankBalance() {
@@ -306,9 +318,8 @@ class TwentyOneGame {
 
   playAgain() {
     while (true) {
-      this.lineBreak();
-      this.prompt(`Do you want to play again? (y)es or (n)o: `);
-      let choice = readline.question().toLowerCase();
+      let query = `Do you want to play again? (y)es or (n)o: `;
+      let choice = readline.question(query).toLowerCase();
       if (choice === 'y' || choice === 'n') return choice === 'y';
     }
   }
